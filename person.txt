@@ -1,5 +1,7 @@
-2	liu	1	
+2	li	1	
 3	2	2	
 4	yuan	3	5000	
 5	yuanli	4	50	
 6	li	3	10000	
+7	zhangmao	3	2000	
+8	liuwen	4	130	

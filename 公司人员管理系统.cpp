@@ -19,6 +19,7 @@ protected:
     char Name[20];  //姓名
     int Duty;       //岗位
     double Earning; //收入
+    double Amount,t;
     Person *next;
 public:
 	Person(char ID,char *Name,int Duty)
@@ -117,10 +118,14 @@ class Company
 {
 private:
 	Person *Worker;  /*员工表*/ 
+	Person *sales; 
+    Person *technicians;
 public:
     Company()
 	{
-		Worker=NULL;      
+		Worker=NULL; 
+		sales=NULL;
+	    technicians=NULL;
 		Load();
 	}
     ~Company()
@@ -137,11 +142,14 @@ public:
 	}
     void Add();     //增加人员
     void Delete();  //删除人员
+    void Change();  //修改人员信息 
     void display();//显示本月工资和销售信息
     void Query();   //查询
     void Set();     //基础数据设置
     void Save();    //数据存盘(包括基础数据，人员数据)
     void Load();    //数据装入(包括基础数据，人员数据)
+	void Rank();    //员工排名 
+	void Bubblesort(Person *head);
 };
 
 void Company::Add()
@@ -229,6 +237,44 @@ void Company::Delete()  //删除人员
     else  //未找到结点
 		cout<<"未找到!\n";
 }
+void Company::Change()  //修改人员
+{
+    int No;
+	double Amount;
+    cout<<"\n** 修改员工信息 **\n";
+    cout<<"ID:";  cin>>No;
+
+    //查找要修改的结点
+    Person *p1,*p2;  p1=Worker;
+    while(p1)
+	{
+		if(p1->No==No)
+        break;
+        else
+		{
+			p2=p1;
+			p1=p1->next;
+		}
+	}
+	if(p1!=NULL){
+	    cout<<"输入修改姓名:";  cin>>p1->Name;
+	    if(p1->Duty==3)
+		{
+			
+			cout<<"本月销售额:";  cin>>p1->Amount;
+		}
+	    else if(p1->Duty==4)
+		{
+			cout<<"本月工作小时数(0-168):";  
+			cin>>p1->t;
+		}
+		cout<<"修改成功"<<endl;
+	}
+	else{
+		cout<<"修改失败"<<endl; 
+	} 
+	
+}
 
 /********************显示**************************/
 void Company::display()
@@ -254,7 +300,7 @@ void Company::display()
     p=p->next;
   }
 
-  cout<<"本月盈利:"<<sum*0.20-sum2<<"  (按照20％利润计算)"<<endl;
+  cout<<"本月盈利:"<<sum*0.40-sum2<<"  (按照40％利润计算)"<<endl;
 
 }
 /***********************设置基础数据**************************/
@@ -314,6 +360,164 @@ void Company:: Query()
 	}
 	if(p1) p1->Output();
 	else cout<<"未找到对应人员"<<endl;
+}
+
+//void Company:: Bubblesort(Person *head)
+//{
+//    Person *cur = head;
+//    Person *tail = head;
+//    Person *p = head;
+//    double a,b;
+//    int length = 0;
+//    int flag = 0;
+//    while (tail != NULL)
+//    {
+//        tail = tail->next;
+//    }
+//    while (p->next!=tail)
+//    {
+//        flag = 0;
+//        cur = head;
+//        while (cur->next != tail)
+//        {
+//        	if(cur->Duty==3){
+//        		double c=((Sales *)cur)->GetAmount();
+//        	    double d=((Sales *)cur->next)->GetAmount();
+//	            if (c > d)
+//	            {
+//	            	cout<<"11";
+//	                //前后交换
+//	                a = c;
+//	                c = d;
+//	                d = a;
+//	                flag = 1;
+//	            }
+//			}
+//			else{
+//				if (cur->t > cur->next->t)
+//	            {
+//	            	cout<<"22";
+//	                //前后交换
+//	                b = cur->t;
+//	                cur->t = cur->next->t;
+//	                cur->next->t = b;
+//	                flag = 1;
+//	            }
+//			}
+//            cur = cur->next;
+//        }
+//        //尾指针向前移动
+//        tail = cur;
+//        //若为1，则证明链表已经有序
+//        if (flag == 0)
+//        {
+//            return;
+//        }
+//    }
+//}
+void Company:: Bubblesort(Person *head)//对链表进行bubble sort
+{
+    Person *pre, *p,*tail;
+    tail = NULL;
+    while (head->next != tail)
+    {
+        pre = head;
+        p = head->next;
+        while (p->next!=tail)
+        {
+        	if(p->Duty==3){
+        		double c=((Sales *)p)->GetAmount();
+        	    double d=((Sales *)p->next)->GetAmount();
+	            if (c > d)
+	            {
+	            	cout<<"11";
+	                pre->next = p->next;
+	                p->next = pre->next->next;
+	                pre->next->next = p;
+	            }
+	            else
+                	p = p->next;
+			}
+			else{
+        		double c=((Technician *)p)->GetT();
+        	    double d=((Technician *)p->next)->GetT();
+	            if (c > d)
+	            {
+	                pre->next = p->next;
+	                p->next = pre->next->next;
+	                pre->next->next = p;
+	            }
+	            else
+                	p = p->next;
+			}
+            pre = pre->next;
+        }
+        tail = p;
+    }
+}
+void Company:: Rank()
+{
+  cout<<"\n**************** 公司销售人员和技术人员本月表现排名 *********************\n";
+  cout<<"编号\t姓名\t\t职位\t\t月工资\t\t销售额或工作时间"<<endl;
+  Person *p=Worker;
+//  Person *sales; 
+//  Person *technicians;
+  while(p)
+  {
+    if(p->Duty==3){
+    	Person *p1;
+    	p1=new Sales(p->No,p->Name,p->Duty,((Sales *)p)->GetAmount());
+    	p1->next=0;
+		if(sales)  //若已经存在结点
+		{
+			Person *p2;
+			p2=sales;
+			while(p2->next)  //查找尾结点
+			{
+				p2=p2->next;
+			}
+	        p2->next=p1;  //连接
+		}
+	    else  //若不存在结点(表空)
+		{
+			sales=p1;  //连接
+		}
+	}
+	if(p->Duty==4){
+		Person *p1;
+		p1=new Technician(p->No,p->Name,p->Duty,((Technician *)p)->GetT());
+		p1->next=0;
+		if(technicians)  //若已经存在结点
+		{
+			Person *p2;
+			p2=technicians;
+			while(p2->next)  //查找尾结点
+			{
+				p2=p2->next;
+			}
+	        p2->next=p1;  //连接
+		}
+	    else  //若不存在结点(表空)
+		{
+			technicians=p1;  //连接
+		}
+	}
+    p=p->next;
+  }
+  Bubblesort(sales);
+  Bubblesort(technicians);
+  cout<<"销售人员排名："<<endl;
+  while(sales)
+  {
+  	sales->Output();
+    sales=sales->next;
+  }
+  cout<<"技术人员排名："<<endl;
+  while(technicians)
+  {
+  	technicians->Output();
+    technicians=technicians->next;
+  }
 }
 /***************************保存******************************/
 void Company::Save()  //数据存盘(包括基础数据，人员数据),均采用文本文件
@@ -422,21 +626,25 @@ int main()
 		cout<<"\n\t\t*********** 公司人员管理系统 ***********\n";
 		cout<<"\t\t\t1－增加人员\n";
 		cout<<"\t\t\t2－删除人员\n";
-		cout<<"\t\t\t3－显示本月经营信息\n";
-		cout<<"\t\t\t4－基础数据设置\n";
-		cout<<"\t\t\t5－查询\n";
-		cout<<"\t\t\t6－保存\n";
-		cout<<"\t\t\t7－退出\t请选择(1-7):";
+		cout<<"\t\t\t3－修改人员信息\n";
+		cout<<"\t\t\t4－显示本月经营信息\n";
+		cout<<"\t\t\t5－销售人员和技术人员排名\n";
+		cout<<"\t\t\t6－基础数据设置\n";
+		cout<<"\t\t\t7－查询\n";
+		cout<<"\t\t\t8－保存\n";
+		cout<<"\t\t\t9－退出\t请选择(1-9):";
 		cin>>c;
 		switch(c)
 		{
 			case '1':  a.Add();   system("pause");break;
 			case '2':  a.Delete();system("pause");break;
-			case '3':  a.display(); system("pause");break;
-			case '4':  a.Set();   system("pause");break;
-			case '5':  a.Query();  system("pause");break;
-			case '6':  a.Save();  system("pause");break;
+			case '3':  a.Change();system("pause");break;
+			case '4':  a.display(); system("pause");break;
+			case '5':  a.Rank(); system("pause");break;
+			case '6':  a.Set();   system("pause");break;
+			case '7':  a.Query();  system("pause");break;
+			case '8':  a.Save();  system("pause");break;
 		}
-	}while(c!='7');
+	}while(c!='9');
 	return 0;
 }
