@@ -74,6 +74,9 @@ public:
 	{
 		this->Amount=Amount;
 	}
+	double SetAmount(double Amount){
+		this->Amount=Amount;
+	}
     double GetAmount()  
 	{
 		return Amount;
@@ -96,6 +99,9 @@ private:
 public:
     Technician(char ID,char *Name,int Duty,double T):Person(ID,Name,Duty)
 	{
+		this->t=T;
+	}
+	double SetT(double T){
 		this->t=T;
 	}
     double GetT()
@@ -235,7 +241,7 @@ void Company::Delete()  //删除人员
 void Company::Change()  //修改人员
 {
     int No;
-	double Amount;
+	double Amount,t; 
     cout<<"\n** 修改员工信息 **\n";
     cout<<"ID:";  cin>>No;
 
@@ -251,17 +257,20 @@ void Company::Change()  //修改人员
 		}
 	}
 	if(p1!=NULL){
-	    cout<<"输入修改姓名:";  cin>>p1->Name;
+	    cout<<"输入修改后的姓名:";  cin>>p1->Name;
 	    if(p1->Duty==3)
 		{
 			
-			cout<<"本月销售额:";  cin>>p1->Amount;
+			cout<<"本月销售额:";  cin>>Amount;
+			((Sales *)p1)->SetAmount(Amount);
 		}
 	    else if(p1->Duty==4)
 		{
 			cout<<"本月工作小时数(0-168):";  
-			cin>>p1->t;
+			cin>>t;
+			((Technician *)p1)->SetT(t);
 		}
+		
 		cout<<"修改成功"<<endl;
 	}
 	else{
